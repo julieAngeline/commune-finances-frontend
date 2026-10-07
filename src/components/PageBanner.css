@@ -1,0 +1,53 @@
+.banner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #0ea5e9 100%);
+  border-radius: 16px;
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.3);
+  animation: banner-in 0.6s ease both;
+}
+@keyframes banner-in {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.banner-circle { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.1); pointer-events: none; }
+.banner-circle-1 { width: 220px; height: 220px; right: -60px; top: -90px; }
+.banner-circle-2 { width: 140px; height: 140px; right: 140px; bottom: -80px; background: rgba(255, 255, 255, 0.07); }
+
+.banner-text { position: relative; max-width: 720px; }
+.banner-text h2 { margin: 0; font-size: 1.45rem; line-height: 1.35; color: #fff; }
+.banner-text p { margin: 6px 0 0; font-size: 0.92rem; color: rgba(255, 255, 255, 0.85); }
+
+.banner-tools { position: relative; display: flex; align-items: center; gap: 12px; }
+
+.banner-select {
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+.banner-select option { color: #111827; }
+.banner-select:focus { outline: 2px solid #fff; }
+
+.banner-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #fff;
+}
+.banner-badge.badge-ok   { color: #059669; }
+.banner-badge.badge-warn { color: #d97706; }
+.banner-badge.badge-off  { color: #6b7280; }

@@ -8,7 +8,9 @@ import Exercices from './pages/Exercices';
 import Recettes from './pages/Recettes';
 import Budgets from './pages/Budgets';
 import Depenses from './pages/Depenses';
-import Comptes from './pages/Comptes';
+import BudgetsRecettes from './pages/BudgetsRecettes';
+
+
 
 export default function App() {
   return (
@@ -22,7 +24,7 @@ export default function App() {
             <Route path="/recettes" element={<Recettes />} />
             <Route path="/budgets" element={<Budgets />} />
             <Route path="/depenses" element={<Depenses />} />
-            <Route path="/comptes" element={<Comptes />} />
+            <Route path="/budgets-recettes" element={<BudgetsRecettes />} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

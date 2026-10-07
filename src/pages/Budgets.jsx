@@ -16,10 +16,8 @@ export default function Budgets() {
         { key: 'taux_consommation', label: 'Taux', render: (v) => `${(v || 0).toFixed(1)} %` },
       ]}
       fields={[
-        { name: 'exercice_id', label: 'Exercice', type: 'm2o', relation: 'commune.exercice', labelField: 'annee' },
-        { name: 'compte_id', label: 'Compte', type: 'm2o', relation: 'commune.compte.depense' },
-        { name: 'objet', label: 'Objet', type: 'text' },
-        { name: 'credit_ouvert', label: 'Crédit ouvert', type: 'number' },
+       { name: 'code_compte', label: 'Compte (6xxx / 2xxx)', type: 'text' },
+       { name: 'libelle', label: 'Libellé du compte', type: 'text', required: false },
       ]}
 
 detail={{

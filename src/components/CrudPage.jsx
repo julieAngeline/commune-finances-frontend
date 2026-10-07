@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, FileSpreadsheet } from 'lucide-react';
+import { Plus, Pencil, Trash2, FileSpreadsheet } from 'lucide-react';
 import { searchRead } from '../api/odoo';
 import Modal from './Modal';
 import DetailModal from './DetailModal';
@@ -8,17 +8,21 @@ import { exportToExcel } from '../utils/exportExcel';
 const emptyForm = (fields) => Object.fromEntries(fields.map((f) => [f.name, '']));
 const fmt = (v) => (Array.isArray(v) ? v[1] : v === false || v == null ? '' : v);
 const fieldStyle = { width: '100%', padding: 8, boxSizing: 'border-box', marginTop: 4 };
+const allow = (flag, row) => (typeof flag === 'function' ? flag(row) : flag !== false);
 
-export default function CrudPage({ title, api, columns, fields, extraActions, detail }) {
-  const [detailRow, setDetailRow] = useState(null);
+export default function CrudPage({
+  title, api, columns, fields = [], extraActions, detail,
+  canCreate = true, canEdit = true, canDelete = true,
+}) {
   const [rows, setRows] = useState([]);
   const [opts, setOpts] = useState({});
   const [form, setForm] = useState(emptyForm(fields));
   const [editId, setEditId] = useState(null);
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState('');       // erreur ao anaty modal
-  const [pageError, setPageError] = useState(''); // erreur ivelan'ny modal
+  const [error, setError] = useState('');
+  const [pageError, setPageError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [detailRow, setDetailRow] = useState(null);
 
   const load = () => api.list().then(setRows).catch((e) => setPageError(e.message));
 
@@ -44,12 +48,7 @@ export default function CrudPage({ title, api, columns, fields, extraActions, de
       return [f.name, f.type === 'm2o' || f.type === 'number' ? +v : v];
     }));
 
-  const openCreate = () => {
-    setEditId(null);
-    setForm(emptyForm(fields));
-    setError('');
-    setOpen(true);
-  };
+  const openCreate = () => { setEditId(null); setForm(emptyForm(fields)); setError(''); setOpen(true); };
 
   const openEdit = (row) => {
     setEditId(row.id);
@@ -65,7 +64,6 @@ export default function CrudPage({ title, api, columns, fields, extraActions, de
 
   const save = async (e) => {
     e.preventDefault();
-    // Fanamarinana ao amin'ny React aloha
     const missing = fields.filter((f) => f.required !== false && form[f.name] === '');
     if (missing.length) {
       setError('Champs obligatoires : ' + missing.map((f) => f.label).join(', '));
@@ -78,7 +76,7 @@ export default function CrudPage({ title, api, columns, fields, extraActions, de
       close();
       load();
     } catch (err) {
-      setError(err.message);   // ValidationError Odoo aseho ao anaty modal
+      setError(err.message);
     } finally {
       setSaving(false);
     }
@@ -92,15 +90,20 @@ export default function CrudPage({ title, api, columns, fields, extraActions, de
 
   return (
     <>
-     <div style={{ display: 'flex', gap: 8 }}>
-  <button className="icon-btn" disabled={!rows.length}
-    onClick={() => exportToExcel(rows, columns, title.replace(/\s+/g, '_'))}>
-    <FileSpreadsheet size={16} /> Excel
-  </button>
-  <button onClick={openCreate} className="icon-btn">
-    <Plus size={16} /> Nouveau
-  </button>
-</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>{title}</h2>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="icon-btn" disabled={!rows.length}
+            onClick={() => exportToExcel(rows, columns, title.replace(/\s+/g, '_'))}>
+            <FileSpreadsheet size={16} /> Excel
+          </button>
+          {canCreate !== false && (
+            <button onClick={openCreate} className="icon-btn">
+              <Plus size={16} /> Nouveau
+            </button>
+          )}
+        </div>
+      </div>
 
       {pageError && <p style={{ color: 'crimson', whiteSpace: 'pre-line' }}>{pageError}</p>}
 
@@ -111,14 +114,16 @@ export default function CrudPage({ title, api, columns, fields, extraActions, de
         <tbody>
           {rows.map((r) => (
             <tr key={r.id}>
-              {columns.map((c) => <td key={c.key}>{c.render ? c.render(r[c.key]) : fmt(r[c.key])}</td>)}
+              {columns.map((c) => (
+                <td key={c.key}>{c.render ? c.render(r[c.key], r) : fmt(r[c.key])}</td>
+              ))}
               <td>
-                 {detail && (
-            <button title="Voir le détail" onClick={() => setDetailRow(r)}><Eye size={14} /></button>
-            )}{' '}
-           <button onClick={() => openEdit(r)}><Pencil size={14} /></button>{' '}  
-                <button onClick={() => openEdit(r)}><Pencil size={14} /></button>{' '}
-                <button onClick={() => del(r.id)}><Trash2 size={14} /></button>
+                {allow(canEdit, r) && (
+                  <button onClick={() => openEdit(r)}><Pencil size={14} /></button>
+                )}{' '}
+                {allow(canDelete, r) && (
+                  <button onClick={() => del(r.id)}><Trash2 size={14} /></button>
+                )}
                 {extraActions?.(r, load, setPageError)}
               </td>
             </tr>
@@ -137,7 +142,7 @@ export default function CrudPage({ title, api, columns, fields, extraActions, de
                     onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}>
                     <option value="">-- {f.label} --</option>
                     {optionsFor(f).map((o) => (
-                      <option key={o.id} value={o.id}>{o[f.labelField || 'display_name']}</option>
+                      <option key={o.id} value={o.id}>{String(o[f.labelField || 'display_name'])}</option>
                     ))}
                   </select>
                 ) : (
@@ -160,14 +165,14 @@ export default function CrudPage({ title, api, columns, fields, extraActions, de
       )}
 
       {detailRow && detail && (
-  <DetailModal
-    title={detail.title(detailRow)}
-    columns={detail.columns}
-    load={() => detail.load(detailRow)}
-    filename={detail.filename(detailRow)}
-    onClose={() => setDetailRow(null)}
-  />
-)}
+        <DetailModal
+          title={detail.title(detailRow)}
+          columns={detail.columns}
+          load={() => detail.load(detailRow)}
+          filename={detail.filename(detailRow)}
+          onClose={() => setDetailRow(null)}
+        />
+      )}
     </>
   );
 }

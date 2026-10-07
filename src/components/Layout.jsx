@@ -12,7 +12,7 @@ const menus = [
   { to: '/recettes', label: 'Recettes', icon: Coins },
   { to: '/budgets', label: 'Budgets dépenses', icon: PiggyBank },
   { to: '/depenses', label: 'Dépenses', icon: Receipt },
-  { to: '/comptes', label: 'Comptes', icon: BookOpen },
+  { to: '/budgets-recettes', label: 'Prévisions recettes', icon: PiggyBank },
 ];
 
 export default function Layout() {

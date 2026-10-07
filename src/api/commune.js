@@ -12,13 +12,14 @@ export const exerciceApi = crud('commune.exercice',
 
 export const recetteApi = crud('commune.recette',
   ['date_versement', 'numero_declaration_recette', 'date_declaration_recette', 'numero_ordre_recette',
-   'date_ordre_recette', 'periode_debut', 'periode_fin', 'montant', 'exercice_id']);
+   'date_ordre_recette', 'periode_debut', 'periode_fin', 'montant', 'exercice_id', 'budget_recette_id', 'code_compte']);
 
-export const compteApi = crud('commune.compte.depense', ['code_compte', 'libelle'], 'code_compte');
+export const budgetRecetteApi = crud('commune.budget.recette',
+  ['exercice_id', 'code_compte', 'libelle', 'objet', 'prevision', 'cumule', 'ecart', 'taux_realisation']);
 
 export const budgetApi = crud('commune.budget.depense',
-  ['exercice_id', 'compte_id', 'objet', 'credit_ouvert', 'cumule', 'disponible', 'taux_consommation']);
+  ['exercice_id', 'code_compte', 'libelle', 'objet', 'credit_ouvert', 'cumule', 'disponible', 'taux_consommation']);
 
 export const depenseApi = crud('commune.depense',
-  ['exercice_id', 'budget_id', 'compte_id', 'date', 'objet', 'credit_ouvert', 'montant', 'cumule', 'disponible'],
+  ['exercice_id', 'budget_id', 'code_compte', 'date', 'objet', 'credit_ouvert', 'montant', 'cumule', 'disponible'],
   'date desc, id desc');
