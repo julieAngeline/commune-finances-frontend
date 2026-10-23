@@ -1,11 +1,13 @@
 import CrudPage from '../components/CrudPage';
 import { budgetRecetteApi, recetteApi } from '../api/commune';
 
+
 export default function BudgetsRecettes() {
   return (
     <CrudPage
       title="Prévisions de recettes"
       api={budgetRecetteApi}
+      searchFields={[{ name: 'code_compte' }, { name: 'libelle' }, { name: 'objet' }]}
       columns={[
         { key: 'exercice_id', label: 'Exercice' },
         { key: 'code_compte', label: 'Compte' },
@@ -16,7 +18,8 @@ export default function BudgetsRecettes() {
         { key: 'taux_realisation', label: 'Taux', render: (v) => `${(v || 0).toFixed(1)} %` },
       ]}
       fields={[
-        { name: 'exercice_id', label: 'Exercice', type: 'm2o', relation: 'commune.exercice', labelField: 'annee' },
+        { name: 'exercice_id', label: 'Exercice', type: 'm2o', relation: 'commune.exercice',
+         labelField: 'annee', domain: [['etat', '!=', 'a_venir']] },
         { name: 'code_compte', label: 'Compte (7xxx)', type: 'text' },
         { name: 'libelle', label: 'Libellé du compte', type: 'text', required: false },
         { name: 'objet', label: 'Objet', type: 'text' },

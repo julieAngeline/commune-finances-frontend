@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, Landmark, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
@@ -65,8 +65,12 @@ export default function Login() {
 
       <form className="login-card" onSubmit={handleLogin}>
         <div className="login-logo">
-          <Landmark size={30} />
-        </div>
+  <img
+    src="/login.PNG"
+    alt="Lapan'ny Tanàna de Fianarantsoa"
+    className="login-logo-image"
+  />
+</div>
         <h1 className="login-title">Commune Finances</h1>
         <p className="login-subtitle">Connectez-vous pour accéder à votre espace</p>
 
@@ -78,7 +82,7 @@ export default function Login() {
             type="text"
             value={login}
             onChange={(e) => setLogin(e.target.value)}
-            placeholder="Votre login Odoo"
+            placeholder="Votre login "
             autoComplete="username"
             required
           />
@@ -92,7 +96,7 @@ export default function Login() {
             type={showPwd ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Votre mot de passe Odoo"
+            placeholder="Votre mot de passe"
             autoComplete="current-password"
             required
           />

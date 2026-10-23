@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, FileSpreadsheet } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Plus, Pencil, Trash2, Eye, FileSpreadsheet, Loader2, Search } from 'lucide-react';
+import { textDomain } from '../api/search';
 import { searchRead } from '../api/odoo';
 import Modal from './Modal';
 import DetailModal from './DetailModal';
 import { exportToExcel } from '../utils/exportExcel';
+import { fmtCell } from '../utils/format';
+import './ui.css';
 
 const emptyForm = (fields) => Object.fromEntries(fields.map((f) => [f.name, '']));
-const fmt = (v) => (Array.isArray(v) ? v[1] : v === false || v == null ? '' : v);
-const fieldStyle = { width: '100%', padding: 8, boxSizing: 'border-box', marginTop: 4 };
 const allow = (flag, row) => (typeof flag === 'function' ? flag(row) : flag !== false);
 
 export default function CrudPage({
   title, api, columns, fields = [], extraActions, detail,
   canCreate = true, canEdit = true, canDelete = true,
+  searchFields = [],
 }) {
   const [rows, setRows] = useState([]);
   const [opts, setOpts] = useState({});
@@ -24,14 +27,31 @@ export default function CrudPage({
   const [saving, setSaving] = useState(false);
   const [detailRow, setDetailRow] = useState(null);
 
-  const load = () => api.list().then(setRows).catch((e) => setPageError(e.message));
+    const [params] = useSearchParams();
+  const [q, setQ] = useState(params.get('q') || '');
+  const [qDelayed, setQDelayed] = useState(q);
 
+  // Recherche différée dans la page
   useEffect(() => {
-    load();
+    const t = setTimeout(() => setQDelayed(q), 300);
+    return () => clearTimeout(t);
+  }, [q]);
+
+  // Quand on arrive depuis la recherche globale (?q=...)
+  useEffect(() => { setQ(params.get('q') || ''); }, [params]);
+
+  const load = () =>
+    api.list(textDomain(searchFields, qDelayed)).then(setRows).catch((e) => setPageError(e.message));
+
+  // Recharge la liste à chaque changement de recherche
+  useEffect(() => { load(); }, [qDelayed]);
+
+  // Listes déroulantes des formulaires (une seule fois)
+  useEffect(() => {
     fields.filter((f) => f.type === 'm2o').forEach((f) => {
       const label = f.labelField || 'display_name';
       const flds = ['id', label, ...(f.filterBy ? [f.filterBy] : [])];
-      searchRead(f.relation, [], flds).then((r) => setOpts((o) => ({ ...o, [f.name]: r })));
+      searchRead(f.relation, f.domain || [], flds).then((r) => setOpts((o) => ({ ...o, [f.name]: r })));
     });
   }, []);
 
@@ -90,16 +110,26 @@ export default function CrudPage({
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="page-head">
         <h2>{title}</h2>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="icon-btn" disabled={!rows.length}
+        <div className="page-actions">
+          {searchFields.length > 0 && (
+            <div className="list-search">
+              <Search size={16} />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Rechercher..."
+              />
+            </div>
+          )}
+          <button className="btn btn-excel" disabled={!rows.length}
             onClick={() => exportToExcel(rows, columns, title.replace(/\s+/g, '_'))}>
-            <FileSpreadsheet size={16} /> Excel
+            <FileSpreadsheet size={17} /> Excel
           </button>
           {canCreate !== false && (
-            <button onClick={openCreate} className="icon-btn">
-              <Plus size={16} /> Nouveau
+            <button className="btn btn-primary" onClick={openCreate}>
+              <Plus size={17} /> Nouveau
             </button>
           )}
         </div>
@@ -107,38 +137,74 @@ export default function CrudPage({
 
       {pageError && <p style={{ color: 'crimson', whiteSpace: 'pre-line' }}>{pageError}</p>}
 
-      <table border="1" cellPadding="6" style={{ borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>{columns.map((c) => <th key={c.key}>{c.label}</th>)}<th>Actions</th></tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id}>
+      <div className="table-card">
+        <table className="data-table">
+          <thead>
+            <tr>
               {columns.map((c) => (
-                <td key={c.key}>{c.render ? c.render(r[c.key], r) : fmt(r[c.key])}</td>
+                <th key={c.key} className={typeof rows[0]?.[c.key] === 'number' ? 'num' : ''}>
+                  {c.label}
+                </th>
               ))}
-              <td>
-                {allow(canEdit, r) && (
-                  <button onClick={() => openEdit(r)}><Pencil size={14} /></button>
-                )}{' '}
-                {allow(canDelete, r) && (
-                  <button onClick={() => del(r.id)}><Trash2 size={14} /></button>
-                )}
-                {extraActions?.(r, load, setPageError)}
-              </td>
+              <th className="col-actions">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={columns.length + 1} className="empty-cell">Aucune donnée à afficher</td>
+              </tr>
+            )}
+            {rows.map((r) => (
+              <tr key={r.id}>
+                {columns.map((c) => {
+                  const raw = r[c.key];
+                  const shown = c.render ? c.render(raw, r) : fmtCell(c.key, raw);
+                  const empty = shown === '' || shown == null;
+                  return (
+                    <td key={c.key} className={typeof raw === 'number' ? 'num' : ''}>
+                      {empty ? <span className="dash-empty">—</span> : shown}
+                    </td>
+                  );
+                })}
+                <td className="col-actions">
+                  <div className="row-actions">
+                    {detail && (
+                      <button className="act act-view" title="Voir le détail" onClick={() => setDetailRow(r)}>
+                        <Eye size={15} />
+                      </button>
+                    )}
+                    {allow(canEdit, r) && (
+                      <button className="act act-edit" title="Modifier" onClick={() => openEdit(r)}>
+                        <Pencil size={15} />
+                      </button>
+                    )}
+                    {allow(canDelete, r) && (
+                      <button className="act act-del" title="Supprimer" onClick={() => del(r.id)}>
+                        <Trash2 size={15} />
+                      </button>
+                    )}
+                    {extraActions?.(r, load, setPageError)}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="table-foot">{rows.length} enregistrement(s)</div>
+      </div>
 
       {open && (
-        <Modal title={editId ? `Modifier ${title}` : `Nouveau - ${title}`} onClose={close}>
+        <Modal title={editId ? `Modifier – ${title}` : `Nouveau – ${title}`} onClose={close}>
           <form onSubmit={save}>
             {fields.map((f) => (
-              <div key={f.name} style={{ marginBottom: 12 }}>
-                <label>{f.label}{f.required !== false && ' *'}</label>
+              <div key={f.name} className="form-field">
+                <label>
+                  {f.label}
+                  {f.required !== false && <span className="req"> *</span>}
+                </label>
                 {f.type === 'm2o' ? (
-                  <select style={fieldStyle} value={form[f.name]}
+                  <select className="form-input" value={form[f.name]}
                     onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}>
                     <option value="">-- {f.label} --</option>
                     {optionsFor(f).map((o) => (
@@ -146,18 +212,26 @@ export default function CrudPage({
                     ))}
                   </select>
                 ) : (
-                  <input style={fieldStyle} type={f.type} value={form[f.name]}
+                  <input className="form-input" type={f.type}
+                    step={f.type === 'number' ? 'any' : undefined}
+                    value={form[f.name]}
                     onChange={(e) => setForm({ ...form, [f.name]: e.target.value })} />
                 )}
               </div>
             ))}
 
-            {error && <p style={{ color: '#f87171', whiteSpace: 'pre-line' }}>{error}</p>}
+            {error && <div className="form-error">{error}</div>}
 
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 16 }}>
-              <button type="button" onClick={close}>Annuler</button>
-              <button type="submit" disabled={saving}>
-                {saving ? 'Enregistrement...' : editId ? 'Modifier' : 'Ajouter'}
+            <div className="modal-actions">
+              <button type="button" className="btn btn-secondary" onClick={close}>Annuler</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? (
+                  <><Loader2 size={17} className="spin" /> Enregistrement...</>
+                ) : editId ? (
+                  <><Pencil size={16} /> Modifier</>
+                ) : (
+                  <><Plus size={17} /> Ajouter</>
+                )}
               </button>
             </div>
           </form>

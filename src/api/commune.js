@@ -7,8 +7,14 @@ const crud = (model, fields, order = 'id desc') => ({
   remove: (id) => remove(model, id),
 });
 
-export const exerciceApi = crud('commune.exercice',
-  ['annee', 'excedent_n_moins_1', 'total_recettes', 'total_depenses', 'fonds_libre', 'etat'], 'annee desc');
+const EXO_FIELDS = ['annee', 'excedent_n_moins_1', 'total_recettes', 'total_depenses', 'fonds_libre', 'etat'];
+
+export const exerciceApi = {
+  ...crud('commune.exercice', EXO_FIELDS, 'annee desc'),
+  // masque les exercices « À venir »
+  list: (domain = []) =>
+    searchRead('commune.exercice', [['etat', '!=', 'a_venir'], ...domain], EXO_FIELDS, { order: 'annee desc' }),
+};
 
 export const recetteApi = crud('commune.recette',
   ['date_versement', 'numero_declaration_recette', 'date_declaration_recette', 'numero_ordre_recette',

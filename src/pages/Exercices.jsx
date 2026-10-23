@@ -268,6 +268,7 @@ export default function Exercices() {
         <CrudPage
           title="Exercices"
           api={exerciceApi}
+          searchFields={[{ name: 'annee', numeric: true }]}
           canCreate={false}
           canEdit={false}
           canDelete={false}

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Wallet, TrendingUp, TrendingDown, PiggyBank } from 'lucide-react';
+import { Wallet, TrendingUp, TrendingDown, Banknote } from 'lucide-react';
 import { exerciceApi, budgetApi, budgetRecetteApi } from '../api/commune';
 import PageBanner from '../components/PageBanner';
 import './Dashboard.css';
 
-const money = (v) => Number(v || 0).toLocaleString('fr-FR');
+const money = (v) => `${Number(v || 0).toLocaleString('fr-FR')} Ar`;
 
 const ETATS = {
   a_venir: { label: 'À venir', cls: 'badge-off' },
@@ -82,7 +82,7 @@ export default function Dashboard() {
           <Kpi icon={Wallet} label="Excédent N-1" value={ex.excedent_n_moins_1} tone="violet" delay={0} />
           <Kpi icon={TrendingUp} label="Total recettes" value={ex.total_recettes} tone="green" delay={80} />
           <Kpi icon={TrendingDown} label="Total dépenses" value={ex.total_depenses} tone="red" delay={160} />
-          <Kpi icon={PiggyBank} label="Fonds libre" value={ex.fonds_libre} tone="blue" delay={240} />
+          <Kpi icon={Banknote} label="Fonds libre" value={ex.fonds_libre} tone="blue" delay={240} />
         </div>
       )}
 

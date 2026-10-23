@@ -1,39 +1,45 @@
-import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Bot } from 'lucide-react';
 import {
-  LayoutDashboard, CalendarDays, Coins, PiggyBank, Receipt, BookOpen,
-  LogOut, Sun, Moon,
+  LayoutDashboard, CalendarDays, Coins, ClipboardList, Receipt, TrendingUp,
+  LogOut, Settings, User,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { nomAffiche } from '../utils/format';
+import cufLogo from '../assets/cuf.jpg';
+
 
 const menus = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/exercices', label: 'Exercices', icon: CalendarDays },
   { to: '/recettes', label: 'Recettes', icon: Coins },
-  { to: '/budgets', label: 'Budgets dépenses', icon: PiggyBank },
+  { to: '/budgets', label: 'Budgets dépenses', icon: ClipboardList },
   { to: '/depenses', label: 'Dépenses', icon: Receipt },
-  { to: '/budgets-recettes', label: 'Prévisions recettes', icon: PiggyBank },
+  { to: '/budgets-recettes', label: 'Prévisions recettes', icon: TrendingUp },
+  { to: '/assistant', label: 'Assistant IA', icon: Bot },
 ];
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
 
-  // ---------- THÈME ----------
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.removeItem('theme');
+  }, []);
 
-  const current = menus.find((m) => pathname.startsWith(m.to));
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <div className="app-shell">
-      {/* ===== SIDEBAR (tout à gauche) ===== */}
+      {/* ===== SIDEBAR ===== */}
       <aside className="sidebar">
         <h3 className="sidebar-title">Commune Finances</h3>
+
         <nav>
           {menus.map(({ to, label, icon: Icon }) => (
             <NavLink key={to} to={to}
@@ -43,25 +49,33 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+
+        <div className="side-bottom">
+          <span className="side-section">Général</span>
+          <NavLink to="/parametres"
+            className={({ isActive }) => 'side-link' + (isActive ? ' active' : '')}>
+            <Settings size={18} />
+            Paramètres
+          </NavLink>
+          <button className="side-logout" onClick={handleLogout}>
+            <LogOut size={18} />
+            Déconnexion
+          </button>
+        </div>
+
+        <div className="side-logo">
+          <img src={cufLogo} alt="Commune Urbaine de Fianarantsoa" />
+        </div>
       </aside>
 
-      {/* ===== ZONE DROITE : TOPBAR + CONTENU ===== */}
+      {/* ===== ZONE DROITE ===== */}
       <div className="main-area">
-        <header className="topbar">
-          <strong>{current?.label || ''}</strong>
-
-          <div className="topbar-right">
-            <button className="icon-btn" title="Changer de thème"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              {theme === 'dark' ? 'Clair' : 'Sombre'}
-            </button>
-            <span>{user?.name}</span>
-            <button className="icon-btn"
-              onClick={async () => { await logout(); navigate('/login'); }}>
-              <LogOut size={14} /> Déconnexion
-            </button>
-          </div>
+        {/* Barre du haut : uniquement l'utilisateur, à droite */}
+        <header className="topbar" style={{ justifyContent: 'flex-end' }}>
+          <span className="topbar-user">
+            <span className="topbar-avatar"><User size={16} /></span>
+            {nomAffiche(user?.name)}
+          </span>
         </header>
 
         <main className="content">

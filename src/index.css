@@ -82,3 +82,196 @@ html, body {
 /* ===== TABLEAUX ===== */
 table { border-color: var(--border); }
 th, td { color: var(--text); }
+
+/* ===== Sidebar en colonne : le bas reste collé en bas ===== */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.side-bottom {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* Libellé GÉNÉRAL estompé */
+.side-section {
+  display: block;
+  margin: 0 0 8px 12px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.55;
+  user-select: none;
+  /* Pour un vrai flou léger, décommentez la ligne suivante : */
+  /* filter: blur(0.6px); */
+}
+
+/* Bouton Déconnexion dans la sidebar */
+.side-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #2d2a2a;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s, transform 0.2s;
+}
+.side-logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  transform: translateX(4px);
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.topbar-avatar {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ===== Tableaux de données ===== */
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow-x: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #111010;
+  background: linear-gradient(135deg, #e9ebef, #dee0e2);
+  white-space: nowrap;
+}
+
+.data-table th.num,
+.data-table td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.data-table tbody td {
+  padding: 12px 16px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table tbody tr:nth-child(even) { background: rgba(148, 163, 184, 0.07); }
+.data-table tbody tr { transition: background 0.15s; }
+.data-table tbody tr:hover { background: var(--accent-soft); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.dash-empty { color: var(--muted); opacity: 0.6; }
+
+.empty-cell {
+  padding: 36px 16px !important;
+  text-align: center;
+  color: var(--muted) !important;
+}
+
+.col-actions { width: 1%; white-space: nowrap; text-align: center !important; }
+.row-actions { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Boutons d'action */
+.act {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+.act:hover { transform: translateY(-2px); }
+.act-view { color: #0ea5e9; background: rgba(14, 165, 233, 0.12); }
+.act-edit { color: #4d4d4c; background: rgba(245, 158, 11, 0.14); }
+.act-del  { color: #dad9d9; background: rgba(239, 68, 68, 0.12); }
+.act-view:hover { background: rgba(14, 165, 233, 0.25); }
+.act-edit:hover { background: rgba(245, 158, 11, 0.28); }
+.act-del:hover  { background: rgba(239, 68, 68, 0.25); }
+
+.table-foot {
+  padding: 10px 16px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+.side-logo {
+  margin-top: 22px;
+  padding: 12px;
+  text-align: center;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.side-logo img {
+  display: block;
+  max-width: 100%;
+  max-height: 300px;
+  margin: 10 auto;
+  object-fit: contain;
+}
+
+/* ===== Interface toujours claire ===== */
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #d1d5db;
+  --accent: #0284c7;
+  --accent-soft: rgba(2, 132, 199, 0.1);
+  color-scheme: light;
+}
+html, body { background: var(--bg); color: var(--text); }
+
+/* ===== En-tête de tableau : bleu marine uni (comme l'en-tête Excel) ===== */
+.data-table thead th {
+  position: static !important;
+  background: #e5e8ea !important;
+  background-image: none !important;
+  color: #070606 !important;
+  border-bottom: none;
+  font-weight: 700;
+}

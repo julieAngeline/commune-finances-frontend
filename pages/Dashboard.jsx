@@ -27,10 +27,10 @@ export default function Dashboard() {
 
       {ex && (
         <div style={{ display: 'flex', gap: 12, margin: '16px 0' }}>
-          <div style={card}>Excédent N-1<h3>{money(ex.excedent_n_moins_1)}</h3></div>
-          <div style={card}>Total recettes<h3>{money(ex.total_recettes)}</h3></div>
-          <div style={card}>Total dépenses<h3>{money(ex.total_depenses)}</h3></div>
-          <div style={card}>Fonds libre<h3>{money(ex.fonds_libre)}</h3></div>
+          <div style={card}>Excédent N-1<h3>{money(ex.excedent_n_moins_1)} </h3></div>
+          <div style={card}>Total recettes<h3>{money(ex.total_recettes)} </h3></div>
+          <div style={card}>Total dépenses<h3>{money(ex.total_depenses)} </h3></div>
+          <div style={card}>Fonds libre<h3>{money(ex.fonds_libre)} </h3></div>
           <div style={card}>État<h3>{ex.etat}</h3></div>
         </div>
       )}

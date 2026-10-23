@@ -9,6 +9,8 @@ import Recettes from './pages/Recettes';
 import Budgets from './pages/Budgets';
 import Depenses from './pages/Depenses';
 import BudgetsRecettes from './pages/BudgetsRecettes';
+import Parametres from './pages/Parametres';
+import ChatBot from './pages/ChatBot';
 
 
 
@@ -25,6 +27,8 @@ export default function App() {
             <Route path="/budgets" element={<Budgets />} />
             <Route path="/depenses" element={<Depenses />} />
             <Route path="/budgets-recettes" element={<BudgetsRecettes />} />
+            <Route path="/parametres" element={<Parametres />} />
+            <Route path="/assistant" element={<ChatBot />} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

@@ -22,7 +22,7 @@ export default function Login() {
       console.log('Utilisateur connecté à Odoo :', user);
 
       setMessage('Connexion réussie ! Bienvenue ' + user.name);
-      navigate('/dashboard');   // ← mandeha any amin'ny menu + dashboard
+      navigate('/dashboard');
     } catch (error) {
       console.error('Erreur de connexion :', error);
       setMessage('Erreur : ' + error.message);
